@@ -1,22 +1,16 @@
-import Vuex from 'vuex';
-import Vue from 'vue';
+import Vue from 'vue'
+import Vuex from 'vuex'
 
-Vue.use(Vuex);
+Vue.use(Vuex)
 
-// Create the Vuex store
 const store = new Vuex.Store({
-    state: {
-        // your application state
-    },
-    mutations: {
-        // your mutations
-    },
-    actions: {
-        // your actions
-    },
-    getters: {
-        // your getters
+  state: {
+    count: 0
+  },
+  mutations: {
+    increment (state) {
+      state.count++
     }
-});
-
+  }
+})
 export default store

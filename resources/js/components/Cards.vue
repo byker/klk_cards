@@ -1,23 +1,195 @@
 <template>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">Example Component</div>
+    <v-container>
+        <v-data-iterator :items="cards" :items-per-page.sync="itemsPerPage" :page.sync="page" :search="search"
+            :sort-by="sortBy.toLowerCase()" :sort-desc="sortDesc" hide-default-footer>
+            <template v-slot:header>
+                <v-toolbar dark color="blue darken-3" class="mb-1">
+                    <v-text-field v-model="search" clearable flat solo-inverted hide-details
+                        prepend-inner-icon="mdi-magnify" label="Search"></v-text-field>
+                    <template v-if="$vuetify.breakpoint.mdAndUp">
+                        <v-spacer></v-spacer>
+                        <v-select v-model="sortBy" flat solo-inverted hide-details :items="keys"
+                            prepend-inner-icon="mdi-magnify" label="Sort by"></v-select>
+                        <v-spacer></v-spacer>
+                        <v-btn-toggle v-model="sortDesc" mandatory>
+                            <v-btn large depressed color="blue" :value="false">
+                                <v-icon>mdi-arrow-up</v-icon>
+                            </v-btn>
+                            <v-btn large depressed color="blue" :value="true">
+                                <v-icon>mdi-arrow-down</v-icon>
+                            </v-btn>
+                        </v-btn-toggle>
+                    </template>
+                </v-toolbar>
+            </template>
 
-                    <div class="card-body">
-                        I'm an example component.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+            <template v-slot:default="props">
+                <v-row>
+                    <v-col v-for="item in props.items" :key="item.name" cols="12" sm="6" md="4" lg="3">
+                        <v-card>
+                            <v-container>
+
+                                <v-card-title class="subheading font-weight-bold">
+                                    {{ item.name }}
+                                </v-card-title>
+
+                                <v-divider></v-divider>
+                                <v-card-text v-for="product in item.products" :key="product.id">
+                                    <v-list-item>
+                                        <v-list-item-content>
+                                            <v-list-item-title class="headline">
+                                                Nazwa {{ product.name }}
+                                            </v-list-item-title>
+                                            <v-list-item-subtitle>
+                                                {{ product.price }}
+                                            </v-list-item-subtitle>
+                                        </v-list-item-content>
+                                    </v-list-item>
+                                </v-card-text>
+                                <v-btn @click="editCard(item)" elevation="2" outlined plain raised
+                                    x-small>Edytuj</v-btn>
+                                <v-btn @click="deleteCard(item)" elevation="2" outlined plain raised
+                                    x-small>Usuń</v-btn>
+                                <v-btn @click="editCardProducts(item)" elevation="2" outlined plain raised
+                                    x-small>Produkty</v-btn>
+                            </v-container>
+
+
+                        </v-card>
+                    </v-col>
+                </v-row>
+            </template>
+
+            <template v-slot:footer>
+                <v-row class="mt-2" align="center" justify="center">
+                    <span class="grey--text">Items per page</span>
+                    <v-menu offset-y>
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-btn dark text color="primary" class="ml-2" v-bind="attrs" v-on="on">
+                                {{ itemsPerPage }}
+                                <v-icon>mdi-chevron-down</v-icon>
+                            </v-btn>
+                        </template>
+                        <v-list>
+                            <v-list-item v-for="(number, index) in itemsPerPageArray" :key="index"
+                                @click="updateItemsPerPage(number)">
+                                <v-list-item-title>{{ number }}</v-list-item-title>
+                            </v-list-item>
+                        </v-list>
+                    </v-menu>
+
+                    <v-spacer></v-spacer>
+
+                    <span class="mr-4 grey--text">
+                        Page {{ page }} of {{ numberOfPages }}
+                    </span>
+                    <v-btn fab dark color="blue darken-3" class="mr-1" @click="formerPage">
+                        <v-icon>mdi-chevron-left</v-icon>
+                    </v-btn>
+                    <v-btn fab dark color="blue darken-3" class="ml-1" @click="nextPage">
+                        <v-icon>mdi-chevron-right</v-icon>
+                    </v-btn>
+                </v-row>
+            </template>
+        </v-data-iterator>
+
+        <EditCard :card="cardToEdit" :open.sync="showEditCardPopup" />
+
+    </v-container>
 </template>
 
+
 <script>
-    export default {
-        mounted() {
-            console.log('Component mounted.')
+import axios from 'axios';
+import EditCard from './EditCard.vue';
+
+
+export default {
+    components: {
+        EditCard
+    },
+    data() {
+        return {
+            itemsPerPageArray: [4, 8, 12],
+            search: '',
+            filter: {},
+            sortDesc: false,
+            page: 1,
+            itemsPerPage: 4,
+            sortBy: 'name',
+            keys: [
+                'Name',
+                'Price',
+                'Description',
+            ],
+            cards: [],
+            showEditCardPopup: false,
+            cardToEdit: {},
         }
+    },
+    computed: {
+        numberOfPages() {
+            return Math.ceil(this.cards.length / this.itemsPerPage)
+        },
+        filteredKeys() {
+            return this.keys.filter(key => key !== 'Name')
+        },
+    },
+    methods: {
+        nextPage() {
+            if (this.page + 1 <= this.numberOfPages) this.page += 1
+        },
+
+        formerPage() {
+            if (this.page - 1 >= 1) this.page -= 1
+        },
+
+        updateItemsPerPage(number) {
+            this.itemsPerPage = number
+        },
+
+        fetchCardsData() {
+            axios.get('/api/cards')
+                .then(response => {
+                    console.log(response.data.cards);
+                    this.cards = response.data.cards;
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        },
+
+        deleteCard(card) {
+            console.log('delete card', card);
+            if(confirm('Czy na pewno chcesz usunąć tą kartę?')) {
+                axios.delete(`/api/${card.id}/cards`)
+                    .then(response => {
+                        console.log(response.data);
+                        this.fetchCardsData();
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            }
+        },
+
+        editCardProducts(card) {
+            console.log('edit Card Products', card);
+
+        },
+
+        editCard(card) {
+            console.log('editCard', card);
+           // this.$router.push(`/card/${card.id}/edit`);
+           this.showEditCardPopup = true;
+           this.cardToEdit = card;
+
+        }
+
+
+    },
+    created() {
+        this.fetchCardsData();
     }
+}
 </script>

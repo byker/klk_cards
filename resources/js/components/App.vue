@@ -1,7 +1,7 @@
 <template>
-    <div>
-            <router-view></router-view> <!-- Add this line -->
-    </div>
+<v-app>
+  <router-view></router-view>
+</v-app>
 
   </template>
   
