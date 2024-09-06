@@ -22,5 +22,7 @@ Route::middleware('auth:api')->group(function () {
     });
     
 });
+Route::post('/cards', 'CardController@create')->name('cards.create');
 Route::get('/cards', 'CardController@index')->name('cards.index');
 Route::delete('/{id}/cards', 'CardController@remove')->name('cards.remove');
+Route::put('/{id}/cards', 'CardController@update')->name('cards.update');

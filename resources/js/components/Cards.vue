@@ -1,6 +1,6 @@
 <template>
     <v-container>
-        <v-data-iterator :items="cards" :items-per-page.sync="itemsPerPage" :page.sync="page" :search="search"
+        <v-data-iterator :items="$store.state.cards" :items-per-page.sync="itemsPerPage" :page.sync="page" :search="search"
             :sort-by="sortBy.toLowerCase()" :sort-desc="sortDesc" hide-default-footer>
             <template v-slot:header>
                 <v-toolbar dark color="blue darken-3" class="mb-1">
@@ -17,6 +17,12 @@
                             </v-btn>
                             <v-btn large depressed color="blue" :value="true">
                                 <v-icon>mdi-arrow-down</v-icon>
+                            </v-btn>
+                            <v-btn @click="$store.commit('setNewCard')" large depressed color="blue" :value="true">
+                                <v-icon>mdi-plus</v-icon>
+                                 <span>
+                                   Dodaj kartotekę
+                                </span>
                             </v-btn>
                         </v-btn-toggle>
                     </template>
@@ -46,7 +52,7 @@
                                         </v-list-item-content>
                                     </v-list-item>
                                 </v-card-text>
-                                <v-btn @click="editCard(item)" elevation="2" outlined plain raised
+                                <v-btn @click="$store.commit('setCardEdit',{'showEditCardPopup':true, 'cardToEdit':item})" elevation="2" outlined plain raised
                                     x-small>Edytuj</v-btn>
                                 <v-btn @click="deleteCard(item)" elevation="2" outlined plain raised
                                     x-small>Usuń</v-btn>
@@ -93,7 +99,7 @@
             </template>
         </v-data-iterator>
 
-        <EditCard :card="cardToEdit" :open.sync="showEditCardPopup" />
+        <EditCard  />
 
     </v-container>
 </template>
@@ -122,20 +128,22 @@ export default {
                 'Price',
                 'Description',
             ],
-            cards: [],
             showEditCardPopup: false,
             cardToEdit: {},
         }
     },
     computed: {
+
         numberOfPages() {
-            return Math.ceil(this.cards.length / this.itemsPerPage)
+            return Math.ceil(this.$store.state.cards.length / this.itemsPerPage)
         },
+
         filteredKeys() {
             return this.keys.filter(key => key !== 'Name')
         },
     },
     methods: {
+
         nextPage() {
             if (this.page + 1 <= this.numberOfPages) this.page += 1
         },
@@ -146,17 +154,6 @@ export default {
 
         updateItemsPerPage(number) {
             this.itemsPerPage = number
-        },
-
-        fetchCardsData() {
-            axios.get('/api/cards')
-                .then(response => {
-                    console.log(response.data.cards);
-                    this.cards = response.data.cards;
-                })
-                .catch(error => {
-                    console.log(error);
-                });
         },
 
         deleteCard(card) {
@@ -176,20 +173,10 @@ export default {
         editCardProducts(card) {
             console.log('edit Card Products', card);
 
-        },
-
-        editCard(card) {
-            console.log('editCard', card);
-           // this.$router.push(`/card/${card.id}/edit`);
-           this.showEditCardPopup = true;
-           this.cardToEdit = card;
-
         }
-
-
     },
     created() {
-        this.fetchCardsData();
+        this.$store.dispatch('fetchCardsData');
     }
 }
 </script>

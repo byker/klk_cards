@@ -78,7 +78,7 @@
         </nav>
 
         <main class="py-4">
-            
+            @yield('content')
             {{-- This div is the main container for the Vue app. --}}
 
             <div id="app"></div>
