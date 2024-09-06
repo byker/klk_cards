@@ -35,16 +35,17 @@
                         <v-card>
                             <v-container>
 
-                                <v-card-title class="subheading font-weight-bold">
+                                <v-card-title @click="$store.dispatch('editCard', item )" class="subheading font-weight-bold" >
                                     {{ item.name }}
+                                    <v-icon small class="ml-2">mdi-pencil</v-icon>
                                 </v-card-title>
 
                                 <v-divider></v-divider>
                                 <v-card-text v-for="product in item.products" :key="product.id">
                                     <v-list-item>
                                         <v-list-item-content>
-                                            <v-list-item-title class="headline">
-                                                Nazwa {{ product.name }}
+                                            <v-list-item-title class="headline" >
+                                                {{ product.name }}
                                             </v-list-item-title>
                                             <v-list-item-subtitle>
                                                 {{ product.price }}
@@ -73,7 +74,6 @@
                         <template v-slot:activator="{ on, attrs }">
                             <v-btn dark text color="primary" class="ml-2" v-bind="attrs" v-on="on">
                                 {{ itemsPerPage }}
-                                <v-icon>mdi-chevron-down</v-icon>
                             </v-btn>
                         </template>
                         <v-list>
@@ -99,7 +99,7 @@
             </template>
         </v-data-iterator>
 
-        <EditCard  />
+        <QuickEditCard  />
 
     </v-container>
 </template>
@@ -107,12 +107,12 @@
 
 <script>
 import axios from 'axios';
-import EditCard from './EditCard.vue';
+import QuickEditCard from './QuickEditCard.vue';
 
 
 export default {
     components: {
-        EditCard
+        QuickEditCard
     },
     data() {
         return {

@@ -8,7 +8,7 @@ Vue.use(VueRouter); // Install the VueRouter plugin
 // Define your routes
 const routes = [
     { path: "/home", component: Cards },
-    { path: "/card/:id/edit", component: EditCard },
+    { path: "/cards/:id/edit", component: EditCard },
 ];
 
 // Create the router instance

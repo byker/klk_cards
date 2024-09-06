@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Card;
+use App\Product;
 use Illuminate\Http\Request;
 
 class CardController extends Controller
@@ -50,8 +51,27 @@ class CardController extends Controller
         $card->accepted = $request->accepted;
         $card->update();
 
+        $products = $request->products;
+
+        if($products){
+           foreach($products as $product){
+            $product = Product::findOrFail($product['id']);
+            $product->card_id = $card->id;
+            $product->update();
+           };
+        };
+
         return response()->json(
             ["message" => "Card updated",
+            "card" => $card],
+            200
+        );
+    }
+    public function getCard($id)
+    {
+        $card = Card::with('products')->findOrFail($id);
+        return response()->json(
+            ["message" => "single card",
             "card" => $card],
             200
         );
