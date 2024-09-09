@@ -70,4 +70,8 @@
         </div>
     </div>
 </div>
+
+<script>
+    window.authToken = @json($authToken);
+</script>
 @endsection

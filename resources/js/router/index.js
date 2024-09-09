@@ -2,6 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Cards from "../components/Cards.vue";
 import EditCard from "../components/EditCard.vue";
+import EditProduct from "../components/EditProduct.vue";
 
 Vue.use(VueRouter); // Install the VueRouter plugin
 
@@ -9,6 +10,7 @@ Vue.use(VueRouter); // Install the VueRouter plugin
 const routes = [
     { path: "/home", component: Cards },
     { path: "/cards/:id/edit", component: EditCard },
+    { path: "/products/:id/edit", component: EditProduct },
 ];
 
 // Create the router instance

@@ -15,18 +15,29 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->group(function () {
-
+Route::middleware('auth:sanctum')->group(function () {
+    // User routes
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-    
-});
-Route::post('/cards', 'CardController@create')->name('cards.create');
-Route::get('/cards', 'CardController@index')->name('cards.index');
-Route::get('/{id}/cards', 'CardController@getCard')->name('cards.getCard');
-Route::delete('/{id}/cards', 'CardController@remove')->name('cards.remove');
-Route::put('/{id}/cards', 'CardController@update')->name('cards.update');
 
-Route::get('/products', 'ProductController@index')->name('products.index');
-Route::get('/{id}/products', 'ProductController@getProduct')->name('products.getProduct');
+    // Card routes
+    Route::prefix('cards')->group(function () {
+        Route::post('/', 'CardController@create')->name('cards.create');
+        Route::get('/', 'CardController@index')->name('cards.index');
+        Route::get('/{id}', 'CardController@show')->name('cards.show');
+        Route::put('/{id}', 'CardController@update')->name('cards.update');
+        Route::delete('/{id}', 'CardController@destroy')->name('cards.destroy');
+    });
+
+    // Product routes
+    Route::prefix('products')->group(function () {
+        Route::get('/', 'ProductController@index')->name('products.index');
+        Route::get('/{id}', 'ProductController@show')->name('products.show');
+        Route::get('/not-assigned-to-card/{cardId}', 'ProductController@getProductsNotAssignedToCard')->name('products.notAssignedToCard');
+        Route::put('/detach-from-card/{productId}', 'ProductController@detachFromCard')->name('products.detachFromCard');
+        Route::put('/attach-to-card/{productId}/{cardId}', 'ProductController@attachToCard')->name('products.attachToCard');
+        Route::put('/{id}', 'ProductController@update')->name('products.update');
+    });
+
+   });

@@ -1,13 +1,15 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import axios from "axios";
-import { set } from "lodash";
+import { remove, set } from "lodash";
 import router from "../router";
 
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
     state: {
+        token: window.authToken || "",
+        pageTitle: "",
         cards: [],
         cardSelected: {},
         products: [],
@@ -22,8 +24,29 @@ const store = new Vuex.Store({
                 (v) => (v && v.length <= 100) || "max 100 znaków",
             ],
         },
+        productRules: {
+            nameRule: [
+                (v) => !!v || "Pole wymagane",
+                (v) => (v && v.length >= 3) || "Conajmniej 3 znaki",
+                (v) => (v && v.length <= 100) || "max 50 znaków",
+            ],
+            priceRule: [
+                (v) => !!v || "Pole wymagane",
+                (v) => (v && v >= 0) || "Cena musi być równa lub większa od 0",
+            ],
+        },
+        token: localStorage.getItem("token") || "",
     },
     mutations: {
+        setToken(state, token) {
+            state.token = token;
+            localStorage.setItem("token", token);
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        },
+        setPageTitle( state , title) {
+            state.pageTitle = title;
+            console.log("state.pageTitle", state.pageTitle);
+        },
         setCards(state, cards) {
             state.cards = cards;
         },
@@ -63,13 +86,26 @@ const store = new Vuex.Store({
                 ? "Zatwierdź kartotekę"
                 : "Odtwierdź kartotekę";
         },
+
         addProductToSelectedCard(state, product) {
             state.cardSelected.products.push(product);
         },
+
+        removeProductFromSelectedCard(state, productId) {
+            const index = state.cardSelected.products.findIndex(
+                (product) => product.id === productId
+            );
+            state.cardSelected.products.splice(index, 1);
+        },
+        setProductSelected(state, product) {
+            state.productSelected = product;
+        },
     },
+
     getters: {
         cards: (state) => state.cards,
     },
+
     actions: {
         fetchCardsData({ commit }) {
             axios
@@ -82,11 +118,15 @@ const store = new Vuex.Store({
                     console.log(error);
                 });
         },
-        fetchProductsData({ commit }) {
+        fetchProductsNotAssignedToCard({ commit }, cardId) {
             axios
-                .get("/api/products")
+                .get(`/api/products/not-assigned-to-card/${cardId}`)
                 .then((response) => {
-                    console.log(response.data.products);
+                    console.log(
+                        "products for card",
+                        cardId,
+                        response.data.products
+                    );
                     commit("setProducts", response.data.products);
                 })
                 .catch((error) => {
@@ -95,10 +135,24 @@ const store = new Vuex.Store({
         },
         fetchSingleCard({ commit, state }, id) {
             axios
-                .get(`/api/${id}/cards`)
+                .get(`/api/cards/${id}`)
                 .then((response) => {
-                    console.log(response.data);
                     commit("setCardSelected", response.data.card);
+                    console.log(
+                        "card selected",
+                        state.cardSelected.products.length
+                    );
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        },
+        fetchSingleProduct({ commit, state }, id) {
+            axios
+                .get(`/api/products/${id}`)
+                .then((response) => {
+                    commit("setProductSelected", response.data.product);
+                    console.log("product selected", state.productSelected);
                 })
                 .catch((error) => {
                     console.log(error);
@@ -107,7 +161,7 @@ const store = new Vuex.Store({
 
         saveQuickEditCard({ commit, state }) {
             axios
-                .put(`/api/${state.cardSelected.id}/cards`, state.cardSelected)
+                .put(`/api/cards/${state.cardSelected.id}`, state.cardSelected)
                 .then(() => {
                     commit("setShowEditCardPopup", false);
                 })
@@ -132,23 +186,57 @@ const store = new Vuex.Store({
             commit("setCardSelected", state.cardSelected);
             router.push(`/cards/${card.id}/edit`);
         },
+        addProductToSelectedCard({ commit, state }) {
+            axios
+                .put(
+                    `/api/products/attach-to-card/${state.productSelected}/${state.cardSelected.id}`
+                )
+                .then((response) => {
+                    commit("addProductToSelectedCard", response.data.product);
+                    console.log("product added", state.cardSelected);
+                })
+                .catch((error) => {
+                    console.error("error get product : ", error);
+                });
+        },
 
-        saveCard({ commit, state }, id) {
-          if(typeof(id) !== 'undefined'){
+        removeProductFromSelectedCard({ commit, state }, productId) {
             axios
-            .get(`/api/${id}/products`, id)
-            .then((response) => {
-              commit("addProductToSelectedCard", response.data.product);
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-          }
-            
+                .put(`/api/products/detach-from-card/${productId}`)
+                .then(() => {
+                    commit("removeProductFromSelectedCard", productId);
+                })
+                .catch((error) => {
+                    console.error("error remove product : ", error);
+                });
+        },
+
+        saveCard({ commit, state }) {
+            console.log("state.cardSelected", state.cardSelected);
             axios
-                .put(`/api/${state.cardSelected.id}/cards`, state.cardSelected)
+                .put(`/api/cards/${state.cardSelected.id}`, state.cardSelected)
                 .then((response) => {
                     console.log("card saved", response);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        },
+
+        editProduct({ commit, state }, productId) {
+            console.log("edit product", productId);
+            router.push(`/products/${productId}/edit`);
+        },
+
+        saveProduct({ state }) {
+            console.log("state.productSelected", state.productSelected);
+            axios
+                .put(
+                    `/api/products/${state.productSelected.id}`,
+                    state.productSelected
+                )
+                .then((response) => {
+                    console.log("product saved", response);
                 })
                 .catch((error) => {
                     console.error(error);
@@ -157,5 +245,14 @@ const store = new Vuex.Store({
     },
     modules: {},
 });
-
+if (store.state.token) {
+    axios.defaults.headers.common["Authorization"] = `Bearer ${store.state.token}`;
+}
+// Set CSRF token for Axios
+const csrfToken = document.head.querySelector('meta[name="csrf-token"]');
+if (csrfToken) {
+    axios.defaults.headers.common["X-CSRF-TOKEN"] = csrfToken.content;
+} else {
+    console.error("CSRF token not found");
+}
 export default store;

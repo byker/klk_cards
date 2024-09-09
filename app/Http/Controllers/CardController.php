@@ -51,8 +51,8 @@ class CardController extends Controller
         $card->accepted = $request->accepted;
         $card->update();
 
-        $products = $request->products;
-
+               
+        $products = $request->products;        
         if($products){
            foreach($products as $product){
             $product = Product::findOrFail($product['id']);
@@ -67,7 +67,7 @@ class CardController extends Controller
             200
         );
     }
-    public function getCard($id)
+    public function show($id)
     {
         $card = Card::with('products')->findOrFail($id);
         return response()->json(
