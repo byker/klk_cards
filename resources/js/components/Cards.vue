@@ -6,11 +6,11 @@
             <template v-slot:header>
                 <v-toolbar dark color="blue darken-3" class="mb-4">
                     <v-text-field v-model="search" clearable flat solo-inverted hide-details
-                        prepend-inner-icon="mdi-magnify" label="Search"></v-text-field>
+                        prepend-inner-icon="mdi-magnify" label="Szukaj"></v-text-field>
                     <template v-if="$vuetify.breakpoint.mdAndUp">
                         <v-spacer></v-spacer>
                         <v-select v-model="sortBy" flat solo-inverted hide-details :items="keys"
-                            prepend-inner-icon="mdi-magnify" label="Sort by"></v-select>
+                            prepend-inner-icon="mdi-magnify" label="Sortuj wg"></v-select>
                         <v-spacer></v-spacer>
                         <v-btn-toggle v-model="sortDesc" mandatory>
                             <v-btn large depressed color="blue" :value="false">

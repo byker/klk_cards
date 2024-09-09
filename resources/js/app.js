@@ -13,12 +13,14 @@ Vue.use(Vuetify)
 Vue.use(VueRouter);
 Vue.use(Vuex);
 
-
 const app = new Vue({
     el: '#app',
     router,
     store,
     vuetify,
     render: h => h(App),
+    mounted(){
+        this.$store.dispatch('getUser');
+    }
 });
  

@@ -2,6 +2,9 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CardController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\Auth\LoginController;
 
 
 /*
@@ -15,29 +18,37 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->group(function () {
-    // User routes
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+// Auth routes
 
+Route::middleware(['web'])->group(function () {
+    Route::post('/validate-token', [LoginController::class, 'validateToken']);
+    Route::post('/login', [LoginController::class ,'login'])->name('login');
+});
+// User routes
+Route::get('/user', function (Request $request) {
+    return $request->user();
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    
     // Card routes
     Route::prefix('cards')->group(function () {
-        Route::post('/', 'CardController@create')->name('cards.create');
-        Route::get('/', 'CardController@index')->name('cards.index');
-        Route::get('/{id}', 'CardController@show')->name('cards.show');
-        Route::put('/{id}', 'CardController@update')->name('cards.update');
-        Route::delete('/{id}', 'CardController@destroy')->name('cards.destroy');
+        Route::post('/', [CardController::class , 'create'])->name('cards.create');
+        Route::get('/', [CardController::class , 'index'])->name('cards.index');
+        Route::get('/{id}', [CardController::class , 'show'])->name('cards.show');
+        Route::put('/{id}', [CardController::class , 'update'])->name('cards.update');
+        Route::delete('/{id}', [CardController::class , 'destroy'])->name('cards.destroy');
     });
 
     // Product routes
     Route::prefix('products')->group(function () {
-        Route::get('/', 'ProductController@index')->name('products.index');
-        Route::get('/{id}', 'ProductController@show')->name('products.show');
-        Route::get('/not-assigned-to-card/{cardId}', 'ProductController@getProductsNotAssignedToCard')->name('products.notAssignedToCard');
-        Route::put('/detach-from-card/{productId}', 'ProductController@detachFromCard')->name('products.detachFromCard');
-        Route::put('/attach-to-card/{productId}/{cardId}', 'ProductController@attachToCard')->name('products.attachToCard');
-        Route::put('/{id}', 'ProductController@update')->name('products.update');
+        Route::get('/', [ProductController::class, 'index'])->name('products.index');
+        Route::get('/{id}', [ProductController::class, 'show'])->name('products.show');
+        Route::get('/not-assigned-to-card/{cardId}', [ProductController::class, 'getProductsNotAssignedToCard'])->name('products.notAssignedToCard');
+        Route::put('/detach-from-card/{productId}', [ProductController::class, 'detachFromCard'])->name('products.detachFromCard');
+        Route::put('/attach-to-card/{productId}/{cardId}', [ProductController::class, 'attachToCard'])->name('products.attachToCard');
+        Route::put('/{id}', [ProductController::class, 'update'])->name('products.update');
     });
 
    });

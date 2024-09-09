@@ -21,6 +21,8 @@ try {
 
 window.axios = require('axios');
 axios.defaults.withCredentials = true;
+axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+axios.defaults.headers.common["Authorization"] = `Bearer ${localStorage.getItem("token")}`;
 
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';

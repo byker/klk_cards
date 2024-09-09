@@ -8,7 +8,6 @@ Vue.use(Vuex);
 
 const store = new Vuex.Store({
     state: {
-        token: window.authToken || "",
         pageTitle: "",
         cards: [],
         cardSelected: {},
@@ -17,6 +16,18 @@ const store = new Vuex.Store({
         showEditCardPopup: false,
         activationBtnText: "Aktywuj kartotekę",
         acceptationBtnText: "Zatwierdź kartotekę",
+        login: {
+            email: "",
+            password: "",
+        },
+        loginError: null,
+        loginRules: {
+            emailRule: [
+                (v) => !!v || "Pole wymagane",
+                (v) => /.+@.+\..+/.test(v) || "Niepoprawny adres email",
+            ],
+            passwordRule: [(v) => !!v || "Pole wymagane"],
+        },
         cardRules: {
             nameRule: [
                 (v) => !!v || "Pole wymagane",
@@ -37,13 +48,16 @@ const store = new Vuex.Store({
         },
         token: localStorage.getItem("token") || "",
     },
+
     mutations: {
         setToken(state, token) {
             state.token = token;
             localStorage.setItem("token", token);
-            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         },
-        setPageTitle( state , title) {
+        dispatchLoginError(state, message) {
+            state.loginError = message;
+        },
+        setPageTitle(state, title) {
             state.pageTitle = title;
             console.log("state.pageTitle", state.pageTitle);
         },
@@ -107,7 +121,28 @@ const store = new Vuex.Store({
     },
 
     actions: {
-        fetchCardsData({ commit }) {
+        proceedAuthentication({ commit, state }) {
+            axios
+                .post("/api/login", state.login)
+                .then((response) => {
+                    console.log("response", response);
+                    commit("setToken", response.data.token);
+                    router.push("/");
+                })
+                .catch((error) => {
+                    commit("dispatchLoginError", "Niepoprawne dane logowania");
+                    console.error("error", error);
+                });
+        },
+        logout({ commit }) {
+            commit("setToken", "");
+            router.push("/login");
+        },
+        fetchCardsData({ commit, state }) {
+            axios.defaults.headers.common[
+                "Authorization"
+            ] = `Bearer ${state.token}`;
+
             axios
                 .get("/api/cards")
                 .then((response) => {
@@ -242,17 +277,18 @@ const store = new Vuex.Store({
                     console.error(error);
                 });
         },
+        getUser() {
+            axios
+                .get("/api/user")
+                .then((response) => {
+                    console.log("user", response.data);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        },
     },
     modules: {},
 });
-if (store.state.token) {
-    axios.defaults.headers.common["Authorization"] = `Bearer ${store.state.token}`;
-}
-// Set CSRF token for Axios
-const csrfToken = document.head.querySelector('meta[name="csrf-token"]');
-if (csrfToken) {
-    axios.defaults.headers.common["X-CSRF-TOKEN"] = csrfToken.content;
-} else {
-    console.error("CSRF token not found");
-}
+
 export default store;

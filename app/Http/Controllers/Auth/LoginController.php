@@ -21,7 +21,7 @@ class LoginController extends Controller
     |
     */
 
-    use AuthenticatesUsers;
+    //use AuthenticatesUsers;
 
     /**
      * Where to redirect users after login.
@@ -42,20 +42,40 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
+
         $credentials = $request->only('email', 'password');
-    
+
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
             $token = $user->createToken('authToken')->plainTextToken;
-    
+
             // Store the token in the session
             $request->session()->put('authToken', $token);
-    
-            return redirect()->intended('home');
+
+            return response()->json(['token' => $token], 200);
         }
-    
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ]);
+
+        return response()->json(['error' => 'The provided credentials do not match our records.'], 401);
+    }
+
+
+    public function validateToken(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (!$token) {
+            return response()->json(['error' => 'Token not provided'], 401);
+        }
+
+        try {
+            $user = Auth::guard('sanctum')->user();
+            if ($user) {
+                return response()->json(['message' => 'Token is valid', 'valid' => true], 200);
+            } else {
+                return response()->json(['error' => 'Token is invalid', 'valid' => false], 401);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Token validation failed'], 401);
+        }
     }
 }
