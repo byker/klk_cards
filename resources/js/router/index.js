@@ -34,7 +34,6 @@ async function isLoggedIn() {
         return false;
     }
     
-    console.log("localStorage.getItem('token')", localStorage.getItem("token"));
     // Validate token
     const response = axios
         .post("/api/validate-token")
@@ -54,15 +53,12 @@ router.beforeEach(async (to, from, next) => {
     store.commit('setIsLoggedIn', isLoggedInResult);
 
     if (to.path !== "/login" && !isLoggedInResult) {
-        console.log('to.path', to.path, 'isLoggedInResult', isLoggedInResult);
 
         next("/login");
     } else if (to.path === "/login" && isLoggedInResult) {
-        console.log('to.path', to.path, 'isLoggedInResult', isLoggedInResult);
         store.dispatch('setCurrentUser');
         next("/");
     } else {
-        console.log('to.path', to.path, 'isLoggedInResult', isLoggedInResult);
         store.dispatch('setCurrentUser');
         next();
     }
