@@ -4,7 +4,6 @@ const mutations = {
         state.token = token;
     },
     setIsLoggedIn(state, value) {
-        console.log("value", value);
         state.isLoggedIn = value;
     },
     setCurrentUser(state, user) {
@@ -16,7 +15,6 @@ const mutations = {
     },
     setPageTitle(state, title) {
         state.pageTitle = title;
-        console.log("state.pageTitle", state.pageTitle);
     },
     setCards(state, cards) {
         state.cards = cards;

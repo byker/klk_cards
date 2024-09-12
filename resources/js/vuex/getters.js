@@ -3,12 +3,7 @@ import { has } from "lodash";
 const getters = {
     currentUserCan: (state) => (permission) => {
         if (state.currentUser.permissions) {
-            console.log(
-                "state.currentUser.permissions",
-                permission,
-                state.currentUser.permissions,
-                state.currentUser.permissions.includes(permission)
-            );
+
             return state.currentUser.permissions.includes(permission);
         }
         return false;
@@ -18,14 +13,7 @@ const getters = {
         const isActive = card.is_active;
         const isAccepted = card.accepted;
         const hasProducts = card.products.length > 0;
-        console.log(
-            "isActive",
-            isActive,
-            "isAccepted",
-            isAccepted,
-            "hasProducts",
-            hasProducts
-        );
+
 
         let response1 = false;
         let response2 = false;
@@ -42,7 +30,6 @@ const getters = {
         } else if (isActive && isAccepted) {
             response2 = false;
         }
-        console.log("checkCardActivation", response1, response2);
         if (response1 && response2) {
             return true;
         }
@@ -53,14 +40,7 @@ const getters = {
         const isActive = card.is_active;
         const isAccepted = card.accepted;
         const hasTitle = card.name.length > 0;
-        console.log(
-            "isActive",
-            isActive,
-            "isAccepted",
-            isAccepted,
-            "hasTitle",
-            hasTitle
-        );
+
 
         let response1 = false;
         let response2 = false;
@@ -78,7 +58,6 @@ const getters = {
         } else if (isActive && isAccepted) {
             response2 = true;
         }
-        console.log("checkCardAcceptation", response1, response2);
         if (response1 && response2) {
             return true;
         }
