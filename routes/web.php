@@ -19,7 +19,7 @@ use App\Http\Controllers\HomeController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 
-//Route::get('/home', 'HomeController@index')->name('home');
+//handle all routes
 
 Route::get('/{any}', function () {
     return view('layouts.app');

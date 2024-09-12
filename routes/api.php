@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CardController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Auth\LoginController;
 
@@ -19,26 +20,27 @@ use App\Http\Controllers\Auth\LoginController;
 */
 
 // Auth routes
-
 Route::middleware(['web'])->group(function () {
-    Route::post('/validate-token', [LoginController::class, 'validateToken']);
-    Route::post('/login', [LoginController::class ,'login'])->name('login');
-});
-// User routes
-Route::get('/user', function (Request $request) {
-    return $request->user();
+    Route::post('/validate-token', [LoginController::class, 'validateToken'])->name('auth.validateToken');
+    Route::post('/login', [LoginController::class, 'login'])->name('auth.login');
 });
 
-Route::middleware('auth:sanctum')->group(function () {
 
-    
+Route::middleware('auth:sanctum', 'checkUserPermissions')->group(function () {
+
+    //logout
+    Route::post('/logout', [LoginController::class, 'logout'])->name('auth.logout');
+
+    // User routes
+    Route::get('/user', [UserController::class, 'show'])->name('user.show');
+
     // Card routes
     Route::prefix('cards')->group(function () {
-        Route::post('/', [CardController::class , 'create'])->name('cards.create');
-        Route::get('/', [CardController::class , 'index'])->name('cards.index');
-        Route::get('/{id}', [CardController::class , 'show'])->name('cards.show');
-        Route::put('/{id}', [CardController::class , 'update'])->name('cards.update');
-        Route::delete('/{id}', [CardController::class , 'destroy'])->name('cards.destroy');
+        Route::post('/', [CardController::class, 'create'])->name('cards.create');
+        Route::get('/', [CardController::class, 'index'])->name('cards.index');
+        Route::get('/{id}', [CardController::class, 'show'])->name('cards.show');
+        Route::put('/{id}', [CardController::class, 'update'])->name('cards.update');
+        Route::delete('/{id}', [CardController::class, 'remove'])->name('cards.remove');
     });
 
     // Product routes
@@ -50,5 +52,4 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/attach-to-card/{productId}/{cardId}', [ProductController::class, 'attachToCard'])->name('products.attachToCard');
         Route::put('/{id}', [ProductController::class, 'update'])->name('products.update');
     });
-
-   });
+});

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
@@ -21,7 +23,6 @@ class LoginController extends Controller
     |
     */
 
-    //use AuthenticatesUsers;
 
     /**
      * Where to redirect users after login.
@@ -40,12 +41,22 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
-    public function login(Request $request)
+
+
+    /**
+     * This method is used to login the user using API
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * 
+     */
+
+    public function login(Request $request): \Illuminate\Http\JsonResponse
     {
 
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
+
             $user = Auth::user();
             $token = $user->createToken('authToken')->plainTextToken;
 
@@ -58,8 +69,14 @@ class LoginController extends Controller
         return response()->json(['error' => 'The provided credentials do not match our records.'], 401);
     }
 
+    /**
+     * This method is used to validate the token
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * 
+     */
 
-    public function validateToken(Request $request)
+    public function validateToken(Request $request): \Illuminate\Http\JsonResponse
     {
         $token = $request->bearerToken();
 
@@ -77,5 +94,19 @@ class LoginController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Token validation failed'], 401);
         }
+    }
+
+    /**
+     * This method is used to logout the user
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * 
+     */
+
+    public function logout(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->user()->tokens()->delete();
+
+        return response()->json(['message' => 'Logged out', 'user' => $request->user()], 200);
     }
 }

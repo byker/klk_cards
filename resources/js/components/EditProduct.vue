@@ -9,8 +9,6 @@
                 v-model="$store.state.productSelected.description"></v-textarea>
             <v-text-field v-model="$store.state.productSelected.price" :rules="$store.state.productRules.priceRule" label="Cena" ></v-text-field>
         </v-form>
-
-
         <v-row>
             <v-col>
                 <v-btn @click="$store.dispatch('saveProduct', $store.state.productSelected)"
@@ -36,6 +34,10 @@ export default {
     created() {
         this.$store.dispatch('fetchSingleProduct', this.$route.params.id);
         this.$store.commit('setPageTitle', 'Edytuj produkt');
+
+        if (this.$store.getters.currentUserCan('editProduct') == false) {
+            this.$router.push('/');
+        }
 
     },
 

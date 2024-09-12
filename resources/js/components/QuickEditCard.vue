@@ -11,8 +11,14 @@
                         <v-row>
                             <v-col cols="12">
                                 <v-text-field label="Nazwa" v-model="$store.state.cardSelected.name"></v-text-field>
-                                <v-btn @click="$store.commit('toggleCardActivation')">{{ $store.state.activationBtnText }}</v-btn>
-                                <v-btn v-if="$store.state.cardSelected.is_active" @click="$store.commit('toggleCardAcceptation')">{{ $store.state.acceptationBtnText }}</v-btn>
+                                <v-btn v-if="$store.getters.checkCardActivationPossible == true" @click="$store.commit('toggleCardActivation')">
+                                    <span v-if="$store.state.cardSelected.is_active == true">Dezaktywuj</span>
+                                    <span v-else>Aktywuj</span>
+                                </v-btn>
+                                <v-btn v-if="$store.getters.checkCardAcceptationPossible == true" @click="$store.commit('toggleCardAcceptation')">
+                                    <span v-if="$store.state.cardSelected.accepted == true">Odtwierdź</span>
+                                    <span v-else>Zatwierdź</span>
+                                </v-btn>
                             </v-col>
                         </v-row>
                         <v-card-actions class="justify-end">
@@ -28,5 +34,6 @@
 </template>
 <script>
 export default {
+
 }
 </script>

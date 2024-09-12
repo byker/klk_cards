@@ -1,6 +1,6 @@
 <template>
     <v-container>
-        <pageTitle ></pageTitle>
+        <pageTitle></pageTitle>
         <v-data-iterator :items="$store.state.cards" :items-per-page.sync="itemsPerPage" :page.sync="page"
             :search="search" :sort-by="sortBy.toLowerCase()" :sort-desc="sortDesc" hide-default-footer>
             <template v-slot:header>
@@ -19,7 +19,8 @@
                             <v-btn large depressed color="blue" :value="true">
                                 <v-icon>mdi-arrow-down</v-icon>
                             </v-btn>
-                            <v-btn @click="$store.commit('setNewCard')" large depressed color="blue" :value="true">
+                            <v-btn v-if="$store.getters.currentUserCan('addCard') == true"
+                                @click="$store.commit('setNewCard')" large depressed color="blue" :value="true">
                                 <v-icon>mdi-plus</v-icon>
                                 <span>
                                     Dodaj kartotekę
@@ -36,10 +37,15 @@
                         <v-card class="flex-grow-1 d-flex">
                             <v-container>
 
-                                <v-card-title @click="$store.dispatch('editCard', item) "
+                                <v-card-title v-if="$store.getters.currentUserCan('editCard') == true"
+                                    @click="$store.dispatch('editCard', item)"
                                     class="font-weight-bold text-primary text-darken-4 cursor-pointer p-0">
                                     {{ item.name }}
                                     <v-icon small class="ml-2">mdi-pencil</v-icon>
+                                </v-card-title>
+                                <v-card-title v-if="$store.getters.currentUserCan('editCard') == false"
+                                    class="font-weight-bold text-primary text-darken-4 p-0">
+                                    {{ item.name }}
                                 </v-card-title>
 
                                 <v-divider></v-divider>
@@ -61,15 +67,13 @@
                                 </v-row>
                                 <v-divider></v-divider>
 
-                                <v-btn
+                                <v-btn v-if="$store.getters.currentUserCan('addCard') == true"
                                     @click="$store.commit('setCardEdit', { 'showEditCardPopup': true, 'cardToEdit': item })"
                                     elevation="2" outlined plain raised x-small>Edytuj</v-btn>
-                                <v-btn @click="deleteCard(item)" elevation="2" outlined plain raised
+                                <v-btn v-if="$store.getters.currentUserCan('deleteCard') == true"
+                                    @click="$store.dispatch('deleteCard', item)" elevation="2" outlined plain raised
                                     x-small>Usuń</v-btn>
-
                             </v-container>
-
-
                         </v-card>
                     </v-col>
                 </v-row>
@@ -138,8 +142,6 @@ export default {
                 'Price',
                 'Description',
             ],
-            showEditCardPopup: false,
-            cardToEdit: {},
         }
     },
     computed: {
@@ -166,19 +168,7 @@ export default {
             this.itemsPerPage = number
         },
 
-        deleteCard(card) {
-            console.log('delete card', card);
-            if (confirm('Czy na pewno chcesz usunąć tą kartę?')) {
-                axios.delete(`/api/${card.id}/cards`)
-                    .then(response => {
-                        console.log(response.data);
-                        this.fetchCardsData();
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    });
-            }
-        },
+
 
 
     },
@@ -189,4 +179,3 @@ export default {
     }
 }
 </script>
-
