@@ -78,7 +78,7 @@ class ProductController extends Controller
 
     public function getProductsNotAssignedToCard($cardId): \Illuminate\Http\JsonResponse
     {
-        $products = DB::table('products')->where('card_id', '!=', stripslashes($cardId))->get();
+        $products = DB::table('products')->where('card_id', '!=', $cardId)->get();
 
         return response()->json(
             ["products" => $products],
@@ -95,7 +95,7 @@ class ProductController extends Controller
 
     public function attachToCard($productId, $cardId) : \Illuminate\Http\JsonResponse
     {
-        $product = Product::findOrFail(stripslashes($productId));
+        $product = Product::findOrFail($productId);
         $product->card_id = $cardId;
         $product->save();
 

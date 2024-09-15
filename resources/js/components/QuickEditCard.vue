@@ -4,8 +4,11 @@
             <template v-slot:default="dialog">
                 <v-card>
                     <v-container>
-                        <v-toolbar color="primary" dark>
+                        <v-toolbar color="primary" dark v-if="(typeof($store.state.cardSelected.id) != 'undefined')" >
                             <h3> Edytuj kartę </h3>
+                        </v-toolbar>
+                        <v-toolbar color="primary" dark v-else>
+                            <h3> Dodaj kartę </h3>
                         </v-toolbar>
                         <v-divider></v-divider>
                         <v-row>

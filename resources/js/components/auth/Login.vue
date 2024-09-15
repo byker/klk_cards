@@ -11,8 +11,8 @@
                     clearable></v-text-field>
 
                 <br>
-                <v-alert v-if="$store.state.login.error" type="error" dismissible>
-                    {{$store.state.login.error}}
+                <v-alert v-if="$store.state.loginError" type="error" dismissible>
+                    {{$store.state.loginError}}
                 </v-alert>
 
                 <v-btn color="success" size="large" type="submit"

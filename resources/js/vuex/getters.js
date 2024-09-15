@@ -9,6 +9,8 @@ const getters = {
         return false;
     },
     checkCardActivationPossible: (state) => {
+        if(typeof(state.cardSelected.id) === 'undefined') return false;
+
         const card = state.cardSelected;
         const isActive = card.is_active;
         const isAccepted = card.accepted;
@@ -36,7 +38,9 @@ const getters = {
         return false;
     },
     checkCardAcceptationPossible: (state) => {
-        const card = state.cardSelected;
+
+        if(typeof(state.cardSelected.id) === 'undefined') return false;
+        const card = state.cardSelected;      
         const isActive = card.is_active;
         const isAccepted = card.accepted;
         const hasTitle = card.name.length > 0;

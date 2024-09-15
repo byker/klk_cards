@@ -60,7 +60,7 @@ class CardController extends Controller
     public function remove($id): \Illuminate\Http\JsonResponse
     {
 
-        $card = Card::findOrFail(stripslashes($id));
+        $card = Card::findOrFail($id);
 
         $card->is_removed = true;
         $card->save();
@@ -82,7 +82,7 @@ class CardController extends Controller
 
     public function update(Request $request, $id): \Illuminate\Http\JsonResponse
     {
-        $card = Card::findOrFail(stripslashes($id));
+        $card = Card::findOrFail($id);
         $validated = $request->validate([
             'name' => 'required|string',
             'is_active' => 'required|boolean',
@@ -98,7 +98,7 @@ class CardController extends Controller
         $products = $request->products;
         if ($products) {
             foreach ($products as $product) {
-                $product = Product::findOrFail(stripslashes($product['id']));
+                $product = Product::findOrFail($product['id']);
                 $product->card_id = $card->id;
                 $product->update();
             };
@@ -121,7 +121,7 @@ class CardController extends Controller
 
     public function show($id): \Illuminate\Http\JsonResponse
     {
-        $card = Card::with('products')->findOrFail(stripslashes($id));
+        $card = Card::with('products')->findOrFail($id);
         return response()->json(
             [
                 "message" => "single card",

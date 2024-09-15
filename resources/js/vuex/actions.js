@@ -161,6 +161,7 @@ const actions = {
                 state.productSelected
             )
             .then((response) => {
+                router.push("/");
             })
             .catch((error) => {
                 console.error(error);
