@@ -3,9 +3,14 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use App\Permission;
 
 class CheckUserPermissions
 {
+
+    protected $permission;
+
+
     /**
      * Handle permissions of current user.
      *
@@ -14,22 +19,16 @@ class CheckUserPermissions
      * @return mixed
      */
 
+    public function __construct(Permission $permission)
+    {
+        $this->permission = $permission;
+    }
+
     public function handle($request, Closure $next)
     {
-        $user = $request->user();
 
-        //admin
-        if ($user->role_id == 1) {
-            $user->permissions = ['createCard', 'editCard', 'removeCard', 'addCard','deleteCard', 'readCard', 'createProduct', 'editProduct', 'removeProduct', 'deleteProduct', 'readProduct'];
-        }
-        //redaktor
-        elseif ($user->role_id == 2) {
-            $user->permissions = ['createCard', 'editCard', 'removeCard', 'deleteCard', 'readCard'];
-        }
-        //user
-        else {
-            $user->permissions = ['readCard'];
-        }
+        $user = $request->user();
+        $user->permissions = $this->permission->getUserPermissions($user->role_id);
 
         return $next($request);
     }
